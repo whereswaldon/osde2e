@@ -21,11 +21,6 @@ import (
 // OSD is used to deploy and manage clusters.
 var OSD *osd.OSD
 
-const (
-	// metadata key holding build-version
-	buildVersionKey = "build-version"
-)
-
 // RunE2ETests runs the osde2e test suite using the given cfg.
 func RunE2ETests(t *testing.T, cfg *config.Config) {
 	var err error
