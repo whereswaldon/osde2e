@@ -49,27 +49,4 @@ var _ = ginkgo.Describe("[Suite: scale-nodes-and-pods] Scaling", func() {
 		err := r.Run(nodeVerticalTimeoutInSeconds, stopCh)
 		Expect(err).NotTo(HaveOccurred())
 	}, float64(nodeVerticalTimeoutInSeconds))
-
-	podVerticalTimeoutInSeconds := 3600
-	ginkgo.It("should be tested with PodVertical", func() {
-		// setup runner
-		scaleCfg := scaleRunnerConfig{
-			Name:         "pod-vertical",
-			PlaybookPath: "workloads/podvertical.yml",
-		}
-		r := scaleCfg.Runner(h)
-
-		r.PodSpec.Containers[0].Env = append(r.PodSpec.Containers[0].Env, kubev1.EnvVar{
-			Name:  "PBENCH_INSTRUMENTATION",
-			Value: "true",
-		}, kubev1.EnvVar{
-			Name:  "ENABLE_PBENCH_COPY",
-			Value: "true",
-		})
-
-		// run tests
-		stopCh := make(chan struct{})
-		err := r.Run(podVerticalTimeoutInSeconds, stopCh)
-		Expect(err).NotTo(HaveOccurred())
-	}, float64(podVerticalTimeoutInSeconds))
 })
