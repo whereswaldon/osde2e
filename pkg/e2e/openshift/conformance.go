@@ -27,6 +27,7 @@ var DefaultE2EConfig = E2EConfig{
 
 var conformanceK8sTestName string = "[Suite: conformance][k8s]"
 var conformanceOpenshiftTestName string = "[Suite: conformance][openshift]"
+var extendedOpenshiftTestName string = "[Suite: informing][openshift-tests]"
 
 func init() {
 	alert.RegisterGinkgoAlert(conformanceK8sTestName, "SD-CICD", "Jeffrey Sica", "sd-cicd-alerts", "sd-cicd@redhat.com", 4)
@@ -49,6 +50,42 @@ var _ = ginkgo.Describe(conformanceK8sTestName, func() {
 		r := h.Runner(cmd)
 
 		r.Name = "k8s-conformance"
+
+		// run tests
+		stopCh := make(chan struct{})
+
+		err := r.Run(e2eTimeoutInSeconds, stopCh)
+		Expect(err).NotTo(HaveOccurred())
+
+		// get results
+		results, err := r.RetrieveTestResults()
+
+		// write results
+		h.WriteResults(results)
+
+		// evaluate results
+		Expect(err).NotTo(HaveOccurred())
+
+	}, float64(e2eTimeoutInSeconds+30))
+})
+
+var _ = ginkgo.Describe(extendedOpenshiftTestName, func() {
+	defer ginkgo.GinkgoRecover()
+	h := helper.New()
+
+	e2eTimeoutInSeconds := 7200
+	ginkgo.It("should run until completion", func() {
+		// configure tests
+		h.SetServiceAccount("system:serviceaccount:%s:cluster-admin")
+
+		cfg := DefaultE2EConfig
+		cfg.Suite = "all"
+		cmd := cfg.Cmd()
+
+		// setup runner
+		r := h.Runner(cmd)
+
+		r.Name = "openshift-tests"
 
 		// run tests
 		stopCh := make(chan struct{})
